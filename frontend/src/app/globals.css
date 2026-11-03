@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-canvas: #f4f6f8;
+  --color-navy: #10233f;
+  --color-navy-soft: #2b4466;
+  --radius-card: 8px;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-canvas);
+  color: #1e293b;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-card);
+}
+
+.progress-indeterminate {
+  position: relative;
+  overflow: hidden;
+  background: #e2e8f0;
+}
+.progress-indeterminate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: #0f766e;
+  border-radius: inherit;
+  animation: slide 1.4s ease-in-out infinite;
+}
+@keyframes slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+textarea {
+  font-family: var(--font-sans);
+}

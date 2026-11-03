@@ -1,0 +1,10 @@
+[project]
+name = "referral-intake-backend"
+version = "0.2.0"
+description = "FastAPI backend for the Referral Intake Copilot demo (synthetic data only)"
+requires-python = ">=3.12"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
