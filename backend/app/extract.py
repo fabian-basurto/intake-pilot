@@ -42,10 +42,25 @@ class ExtractionRun:
     duration_ms: int
 
 
+def _error_code(err: openai.OpenAIError) -> str | None:
+    body = getattr(err, "body", None)
+    if isinstance(body, dict):
+        inner = body.get("error") if isinstance(body.get("error"), dict) else body
+        code = inner.get("code") or inner.get("type")
+        return code if isinstance(code, str) else None
+    return None
+
+
 def _map_api_error(err: openai.OpenAIError) -> ExtractionError:
     if isinstance(err, openai.AuthenticationError):
         return ExtractionError("The OpenAI API rejected the API key.", "auth")
     if isinstance(err, openai.RateLimitError):
+        # OpenAI also answers HTTP 429 when the account has no credit. Retrying cannot fix that.
+        if _error_code(err) == "insufficient_quota":
+            return ExtractionError(
+                "The OpenAI account has no available credit. Add billing credit at platform.openai.com, then try again.",
+                "quota",
+            )
         return ExtractionError("The model API is rate limited. Try again in a moment.", "rate_limit", True)
     if isinstance(err, openai.BadRequestError):
         return ExtractionError(f"The model API rejected the request: {err.message}", "bad_request")

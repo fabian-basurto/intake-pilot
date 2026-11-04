@@ -256,6 +256,21 @@ def test_extract_maps_api_errors(monkeypatch, with_key, error, code, retryable):
     assert files.deleted == ["file_test123"]
 
 
+def test_insufficient_quota_is_not_retryable(monkeypatch, with_key):
+    request = httpx_mod.Request("POST", "https://api.openai.com/v1/responses")
+    quota = openai.RateLimitError(
+        "You exceeded your current quota",
+        response=httpx_mod.Response(429, request=request),
+        body={"error": {"message": "quota", "type": "insufficient_quota", "code": "insufficient_quota"}},
+    )
+    install(monkeypatch, FakeResponses(error=quota))
+    with pytest.raises(ExtractionError) as info:
+        extract_from_pdf(b"%PDF-1.4")
+    assert info.value.code == "quota"
+    assert info.value.retryable is False
+    assert "credit" in info.value.message
+
+
 def test_upload_failure_is_mapped_and_nothing_to_delete(monkeypatch, with_key):
     files = install(monkeypatch, FakeResponses(fake_response("{}")), FakeFiles(error=_status_error(openai.RateLimitError, 429)))
     with pytest.raises(ExtractionError) as info:
